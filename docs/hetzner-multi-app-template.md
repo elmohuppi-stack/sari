@@ -200,9 +200,9 @@ Bitte richte Docker-Compose, Produktions-Env, Nginx und die Verifikationsschritt
 
 ---
 
-## 8. Aktuelle Werte fuer `Finanzen`
+## 8. Aktuelle Werte
 
-Fuer dieses Repo wurden aktuell diese Werte verwendet:
+### `Finanzen`
 
 | Variable          | Wert                        |
 | ----------------- | --------------------------- |
@@ -214,6 +214,17 @@ Fuer dieses Repo wurden aktuell diese Werte verwendet:
 | `DEPLOY_PATH`     | `/var/www/finanzen`         |
 
 Der konkrete Ablauf fuer Updates und Rollbacks steht in `docs/deployment.md`.
+
+### `SARI`
+
+| Variable          | Wert                       |
+| ----------------- | -------------------------- |
+| `APP_SLUG`        | `sari`                     |
+| `FRONTEND_DOMAIN` | `sari.elmarhepp.de`        |
+| `API_DOMAIN`      | — (reines Frontend)        |
+| `WEB_PORT`        | `3061`                     |
+| `API_PORT`        | —                          |
+| `DEPLOY_PATH`     | `/var/www/sari`            |
 
 ---
 

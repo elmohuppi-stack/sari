@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useFilterStore } from '@/stores/filterStore'
 import { useDataStore } from '@/stores/dataStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -137,34 +137,29 @@ const tableData = computed(() => {
   return filterStore.filteredData.slice(-100).reverse()
 })
 
-// Zeitraum-Optionen
+// Zeitraum-Optionen (Season-basiert)
 const timeRangeOptions: { value: TimeRange; label: string }[] = [
-  { value: '6months', label: 'Letzte 6 Monate' },
-  { value: '12months', label: 'Letzte 12 Monate' },
-  { value: 'year', label: 'Bestimmtes Jahr' },
-  { value: 'all', label: 'Gesamter Zeitraum' },
+  { value: '2025/26', label: '2025/26' },
+  { value: 'from-2024/25', label: 'ab 2024/25' },
+  { value: 'from-2023/24', label: 'ab 2023/24' },
+  { value: 'from-2022/23', label: 'ab 2022/23' },
+  { value: 'from-2021/22', label: 'ab 2021/22' },
+  { value: 'from-2020/21', label: 'ab 2020/21' },
+  { value: 'from-2019/20', label: 'ab 2019/20' },
+  { value: 'from-2018/19', label: 'ab 2018/19' },
+  { value: 'from-2017/18', label: 'ab 2017/18' },
+  { value: 'all', label: 'gesamter Zeitraum' },
 ]
 
 const ageGroupOptions: AgeGroup[] = ['00+', '0-4', '5-14', '15-34', '35-59', '60-79', '80+']
 const sariTypeOptions: SariType[] = ['Gesamt', 'COVID-19', 'Influenza', 'RSV']
-
-// Wenn "Jahr" ausgewählt ist, automatisch das erste verfügbare Jahr setzen
-watch(
-  () => filterStore.timeRange,
-  (newVal) => {
-    if (newVal === 'year' && !filterStore.selectedYear && filterStore.availableYears.length > 0) {
-      filterStore.setFilter({ selectedYear: filterStore.availableYears[0] })
-    }
-  }
-)
 </script>
 
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <!-- Filterbereich -->
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-gray-700">Filter</h3>
+      <div class="flex items-center justify-end mb-3">
         <button
           class="sm:hidden text-sm text-blue-600 hover:text-blue-800"
           @click="uiStore.toggleFilters()"
@@ -191,24 +186,6 @@ watch(
               :value="opt.value"
             >
               {{ opt.label }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Jahr (nur bei Auswahl "Bestimmtes Jahr") -->
-        <div v-if="filterStore.timeRange === 'year'">
-          <label class="block text-sm font-medium text-gray-600 mb-1">Jahr</label>
-          <select
-            :value="filterStore.selectedYear"
-            @change="filterStore.setFilter({ selectedYear: Number(($event.target as HTMLSelectElement).value) })"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option
-              v-for="year in filterStore.availableYears"
-              :key="year"
-              :value="year"
-            >
-              {{ year }}
             </option>
           </select>
         </div>

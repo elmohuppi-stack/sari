@@ -8,10 +8,11 @@ const router = useRouter()
   <header class="bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-4">
-          <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <h1 class="text-xl font-semibold text-gray-900">SARI-Hospitalisierungsinzidenz in Deutschland pro 100.000 Einwohner</h1>
+        <div>
+          <router-link to="/" class="hover:opacity-80 transition-opacity">
+            <h1 class="text-xl font-semibold text-gray-900 mb-1">SARI-Hospitalisierungsinzidenz (RKI)</h1>
           </router-link>
+          <p class="text-sm text-gray-500">in Deutschland pro 100.000 Einwohner, Update: 06.07.2026</p>
         </div>
         <nav class="flex items-center gap-6 text-sm">
           <router-link
