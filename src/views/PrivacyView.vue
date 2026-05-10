@@ -165,14 +165,29 @@ const legal = {
 
         <h3 class="font-semibold text-gray-700 mt-3">Cookies</h3>
         <p>
-          Diese Website verwendet keine Cookies oder andere Tracking-Technologien. Es werden
-          keine Daten zu Analyse- oder Marketingzwecken erhoben.
+          Diese Website verwendet keine Cookies.
+        </p>
+
+        <h3 class="font-semibold text-gray-700 mt-3">Umami Analytics</h3>
+        <p>
+          Diese Website nutzt <strong>Umami Analytics</strong>, eine datenschutzfreundliche
+          Webanalyse-Software. Umami wird auf einem eigenen Server betrieben und erhebt
+          ausschließlich anonymisierte Daten (z. B. Seitenaufrufe, Browsertyp,
+          Betriebssystem, Herkunftsland). Es werden <strong>keine Cookies</strong> gesetzt
+          und <strong>keine personenbezogenen Daten</strong> wie IP-Adressen gespeichert oder
+          an Dritte weitergegeben. Die Daten dienen ausschließlich der statistischen
+          Auswertung zur Verbesserung des Angebots.
+        </p>
+        <p>
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der
+          Optimierung und Sicherheit des Webangebots). Da keine personenbezogenen Daten
+          verarbeitet werden, ist keine Einwilligung erforderlich.
         </p>
 
         <h3 class="font-semibold text-gray-700 mt-3">Dritte</h3>
         <p>
-          Diese Website bindet keine externen Dienste wie Tracking, Analyse-Tools, soziale
-          Medien oder externe Schriftarten ein. Es werden keine Daten an Dritte weitergegeben.
+          Diese Website bindet keine externen Dienste wie soziale Medien oder externe
+          Schriftarten ein. Es werden keine Daten an Dritte weitergegeben.
         </p>
       </section>
 
