@@ -1,4 +1,12 @@
 <script setup lang="ts">
+const legal = {
+  name: import.meta.env.VITE_LEGAL_NAME as string,
+  email: import.meta.env.VITE_LEGAL_EMAIL as string,
+  addressLine1: import.meta.env.VITE_LEGAL_ADDRESS_LINE_1 as string,
+  addressLine2: import.meta.env.VITE_LEGAL_ADDRESS_LINE_2 as string,
+  country: import.meta.env.VITE_LEGAL_COUNTRY as string,
+  contentResponsible: import.meta.env.VITE_LEGAL_CONTENT_RESPONSIBLE as string,
+}
 </script>
 
 <template>
@@ -9,25 +17,25 @@
       <section>
         <h2 class="text-lg font-semibold text-gray-800">Angaben gemäß § 5 TMG</h2>
         <p>
-          Elmar Hepp<br />
-          Musterstraße 123<br />
-          12345 Musterstadt
+          {{ legal.name }}<br />
+          {{ legal.addressLine1 }}<br />
+          {{ legal.addressLine2 }}
         </p>
       </section>
 
       <section>
         <h2 class="text-lg font-semibold text-gray-800">Kontakt</h2>
         <p>
-          E-Mail: <a href="mailto:mail@elmarhepp.de" class="text-blue-600 hover:text-blue-800 underline">mail@elmarhepp.de</a>
+          E-Mail: <a :href="`mailto:${legal.email}`" class="text-blue-600 hover:text-blue-800 underline">{{ legal.email }}</a>
         </p>
       </section>
 
       <section>
         <h2 class="text-lg font-semibold text-gray-800">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
         <p>
-          Elmar Hepp<br />
-          Musterstraße 123<br />
-          12345 Musterstadt
+          {{ legal.contentResponsible }}<br />
+          {{ legal.addressLine1 }}<br />
+          {{ legal.addressLine2 }}
         </p>
       </section>
 

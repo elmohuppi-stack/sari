@@ -1,4 +1,11 @@
 <script setup lang="ts">
+const legal = {
+  name: import.meta.env.VITE_LEGAL_NAME as string,
+  email: import.meta.env.VITE_LEGAL_EMAIL as string,
+  addressLine1: import.meta.env.VITE_LEGAL_ADDRESS_LINE_1 as string,
+  addressLine2: import.meta.env.VITE_LEGAL_ADDRESS_LINE_2 as string,
+  country: import.meta.env.VITE_LEGAL_COUNTRY as string,
+}
 </script>
 
 <template>
@@ -96,12 +103,12 @@
           Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:
         </p>
         <p>
-          Elmar Hepp<br />
-          Musterstraße 123<br />
-          12345 Musterstadt
+          {{ legal.name }}<br />
+          {{ legal.addressLine1 }}<br />
+          {{ legal.addressLine2 }}
         </p>
         <p>
-          E-Mail: <a href="mailto:mail@elmarhepp.de" class="text-blue-600 hover:text-blue-800 underline">mail@elmarhepp.de</a>
+          E-Mail: <a :href="`mailto:${legal.email}`" class="text-blue-600 hover:text-blue-800 underline">{{ legal.email }}</a>
         </p>
 
         <h3 class="font-semibold text-gray-700 mt-3">Speicherdauer</h3>
