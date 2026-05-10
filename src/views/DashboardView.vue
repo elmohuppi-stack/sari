@@ -161,14 +161,6 @@ watch(
 
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <!-- Titelbereich -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-900">SARI-Hospitalisierungsinzidenz</h2>
-      <p class="text-gray-500 mt-1">
-        Entwicklung schwerer akuter Atemwegsinfektionen (SARI) in Deutschland
-      </p>
-    </div>
-
     <!-- Filterbereich -->
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
       <div class="flex items-center justify-between mb-3">
