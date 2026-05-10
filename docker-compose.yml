@@ -1,6 +1,13 @@
 services:
-  web:
+  app:
     build: .
-    restart: unless-stopped
     ports:
-      - "127.0.0.1:3061:3000"
+      - "127.0.0.1:${WEB_PORT}:80"
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - hetzner-network
+
+networks:
+  hetzner-network:
+    external: true
