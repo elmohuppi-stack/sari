@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Umgebung — enthält die Betreiberangaben (ladungsfähige Anschrift).
+# Gehört niemals ins Repository, .env.example zeigt die Struktur.
+.env
+.env.*
+!.env.example
