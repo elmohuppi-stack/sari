@@ -1,17 +1,17 @@
+# Seit dem 11.08.2026 wird das Frontend IM Container gebaut (siehe Dockerfile).
+# Deshalb müssen src, package.json, vite.config.ts, die tsconfigs und vor allem
+# `.env` im Build-Kontext bleiben — `.env` trägt die VITE_LEGAL_*-Werte, die Vite
+# beim Bauen einbackt. Vorher standen sie alle hier und wurden ausgeschlossen; das
+# war folgerichtig, solange nur ein fertiges dist/ kopiert wurde.
+#
+# `.env` landet dabei nicht im ausgelieferten Bild: die zweite Stufe kopiert
+# ausschließlich /app/dist.
+
 node_modules
-src
-public
-scripts
+dist
 docs
-.env
-.gitignore
-Makefile
-package.json
-package-lock.json
-tsconfig.json
-tsconfig.app.json
-tsconfig.node.json
-vite.config.ts
 plan.md
 Readme.md
 *.md
+.gitignore
+Makefile
