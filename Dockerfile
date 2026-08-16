@@ -14,7 +14,7 @@
 #      geplante Umzug klont jede App neu; sari hätte danach eine leere Seite
 #      ausgeliefert, und zwar mit Statuscode 200.
 #
-# Befund und Begründung: optimize-hetzner, OFFENE-PROBLEME.md Punkt 39.
+# Befund und Begründung: platform, OFFENE-PROBLEME.md Punkt 39.
 #
 # Gegenprobe vor der Umstellung: ein kalter Build aus diesem Quelltext ergibt
 # Dateien, die **byte-identisch** mit dem Mai-Stand sind (`diff -r` ohne Befund,
