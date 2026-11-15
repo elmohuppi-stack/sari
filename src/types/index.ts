@@ -10,7 +10,7 @@ export interface SariDataRow {
 
 export interface SariDataPoint {
   season: string
-  kalenderwoche: number
+  kalenderwoche: string
   weekStartDate: string // ISO date
   year: number
   ageGroup: string
@@ -22,7 +22,14 @@ export type SariType = 'Gesamt' | 'COVID-19' | 'Influenza' | 'RSV'
 
 export type AgeGroup = '00+' | '0-4' | '5-14' | '15-34' | '35-59' | '60-79' | '80+'
 
-export type TimeRange = '2025/26' | 'from-2024/25' | 'from-2023/24' | 'from-2022/23' | 'from-2021/22' | 'from-2020/21' | 'from-2019/20' | 'from-2018/19' | 'from-2017/18' | 'all'
+/**
+ * Zeitraum-Filter. Neben 'all' gibt es zwei Formen:
+ *   'from-2024/25' – ab dieser Saison bis heute
+ *   '2026/27'      – genau diese Saison
+ * Die verfügbaren Werte kommen aus den Daten (siehe dataStore.seasons),
+ * damit eine neue Saison nicht im Code nachgetragen werden muss.
+ */
+export type TimeRange = 'all' | `from-${string}` | `${number}/${number}`
 
 export interface FilterState {
   timeRange: TimeRange

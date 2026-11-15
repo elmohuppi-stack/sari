@@ -4,7 +4,18 @@ import { computed } from 'vue'
 
 const dataStore = useDataStore()
 
-const formattedDate = computed(() => {
+// "Daten bis": letzter Tag der letzten Kalenderwoche im Datensatz.
+const dataStandLabel = computed(() => {
+  if (!dataStore.dataStand) return null
+  return new Date(`${dataStore.dataStand}T00:00:00`).toLocaleDateString('de-DE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+})
+
+// Wann die JSON zuletzt erzeugt wurde (Zeitpunkt des Datenlaufs).
+const generatedLabel = computed(() => {
   if (!dataStore.lastUpdated) return null
   return new Date(dataStore.lastUpdated).toLocaleDateString('de-DE', {
     year: 'numeric',
@@ -30,11 +41,14 @@ const formattedDate = computed(() => {
         </div>
         <div>
           <h3 class="font-semibold text-gray-700 mb-2">Datenstand</h3>
-          <p v-if="formattedDate">
-            Zuletzt aktualisiert: {{ formattedDate }}
+          <p v-if="dataStandLabel">
+            Daten bis {{ dataStandLabel }}<template v-if="dataStore.latestWeek"> ({{ dataStore.latestWeek }})</template>
           </p>
           <p v-else>
             Daten werden geladen…
+          </p>
+          <p v-if="generatedLabel" class="mt-1 text-xs text-gray-400">
+            Abgerufen am {{ generatedLabel }}
           </p>
           <p class="mt-1">
             <a

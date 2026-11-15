@@ -1,4 +1,4 @@
-.PHONY: help install dev build preview transform all clean
+.PHONY: help install dev build preview fetch-data transform update-data data-report all clean
 
 # ─── Hilfe ────────────────────────────────────────────────────────────────────
 
@@ -9,14 +9,17 @@ help:
 	@echo "║   SARI-Dashboard — verfügbare Make-Kommandos        ║"
 	@echo "╚══════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "  make install    Abhängigkeiten installieren (npm install)"
-	@echo "  make dev        Entwicklungsserver starten (Hot-Reload)"
-	@echo "  make build      Produktions-Build erstellen"
-	@echo "  make preview    Build lokal ausliefern (nach make build)"
-	@echo "  make transform  TSV-Daten in JSON konvertieren"
-	@echo "  make all        transform + build in einem Schritt"
-	@echo "  make clean      node_modules und dist löschen"
-	@echo "  make help       Diese Hilfe anzeigen"
+	@echo "  make install      Abhängigkeiten installieren (npm install)"
+	@echo "  make dev          Entwicklungsserver starten (Hot-Reload)"
+	@echo "  make build        Produktions-Build erstellen"
+	@echo "  make preview      Build lokal ausliefern (nach make build)"
+	@echo "  make update-data  RKI-Daten holen und nach JSON wandeln"
+	@echo "  make fetch-data   nur die TSV vom RKI holen"
+	@echo "  make transform    nur die vorhandene TSV nach JSON wandeln"
+	@echo "  make data-report  Datenstand im JSON anzeigen"
+	@echo "  make all          update-data + build in einem Schritt"
+	@echo "  make clean        node_modules und dist löschen"
+	@echo "  make help         Diese Hilfe anzeigen"
 	@echo ""
 
 # ─── Workflows ─────────────────────────────────────────────────────────────────
@@ -33,10 +36,19 @@ build:
 preview:
 	npm run preview
 
-transform:
-	node scripts/transform.mjs
+update-data:
+	npm run update-data
 
-all: transform build
+fetch-data:
+	npm run fetch-data
+
+transform:
+	npm run transform
+
+data-report:
+	npm run data-report
+
+all: update-data build
 
 clean:
 	rm -rf node_modules dist

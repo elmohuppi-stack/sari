@@ -4,10 +4,15 @@
  * Transformiert die SARI-Hospitalisierungsinzidenz TSV-Datei in das
  * interne JSON-Format für das Frontend.
  *
- * Usage: node scripts/transform.mjs
+ * Usage: node scripts/transform.mjs [--data-date=YYYY-MM-DD]
  *
  * Erwartet: data/SARI-Hospitalisierungsinzidenz.tsv
  * Erzeugt:  data/sari-data.json
+ *
+ * `--data-date` ist der Datenstand, den scripts/fetch-data.mjs aus der
+ * letzten Kalenderwoche ableitet (Sonntag dieser Woche). Ohne Angabe wird
+ * er hier selbst berechnet. Im JSON steht er als `dataStand`; das Frontend
+ * zeigt damit "Daten bis …" statt des Zeitpunkts unseres Builds.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -24,26 +29,49 @@ const VALID_AGE_GROUPS = new Set(['00+', '0-4', '5-14', '15-34', '35-59', '60-79
 const VALID_SARI_TYPES = new Set(['Gesamt', 'COVID-19', 'Influenza', 'RSV'])
 
 /**
- * Parst eine Kalenderwoche im Format "2026-W18" und gibt das Datum
- * des Montags dieser Woche als ISO-String zurück.
+ * Montag der Kalenderwoche als ISO-String, gerechnet in UTC.
+ * UTC ist hier Pflicht: der Rechner läuft in Europe/Berlin, GitHub Actions in
+ * UTC. Mit lokalen Date-Objekten käme je nach Zeitzone ein anderer Tag heraus.
  */
-function parseCalendarWeek(weekStr) {
+function weekStartDate(weekStr) {
   const match = weekStr.match(/^(\d{4})-W(\d{1,2})$/)
   if (!match) return null
 
   const year = parseInt(match[1], 10)
   const week = parseInt(match[2], 10)
 
-  // ISO Wochendatum: Der 4. Januar ist immer in KW 1
-  const jan4 = new Date(year, 0, 4)
-  const dayOfWeek = jan4.getDay() || 7 // Sonntag = 7
+  // ISO-Wochen: Der 4. Januar liegt immer in KW 1.
+  const jan4 = new Date(Date.UTC(year, 0, 4))
+  const dayOfWeek = jan4.getUTCDay() || 7 // Sonntag = 7
   const mondayOfWeek1 = new Date(jan4)
-  mondayOfWeek1.setDate(jan4.getDate() - dayOfWeek + 1)
+  mondayOfWeek1.setUTCDate(jan4.getUTCDate() - dayOfWeek + 1)
 
   const monday = new Date(mondayOfWeek1)
-  monday.setDate(mondayOfWeek1.getDate() + (week - 1) * 7)
+  monday.setUTCDate(mondayOfWeek1.getUTCDate() + (week - 1) * 7)
 
   return monday.toISOString().split('T')[0]
+}
+
+/**
+ * Sonntag der Woche als ISO-String – der letzte Tag, den eine Kalenderwoche
+ * abdeckt. Dient als Datenstand, wenn fetch-data.mjs keinen übergibt.
+ */
+function weekEndDate(weekStr) {
+  const monday = weekStartDate(weekStr)
+  if (!monday) return null
+  const date = new Date(`${monday}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + 6)
+  return date.toISOString().split('T')[0]
+}
+
+/** Argumente der Form --name=wert einsammeln. */
+function parseArgs(argv) {
+  const args = {}
+  for (const arg of argv.slice(2)) {
+    const match = /^--([^=]+)=(.*)$/.exec(arg)
+    if (match) args[match[1]] = match[2]
+  }
+  return args
 }
 
 /**
@@ -72,8 +100,10 @@ function validate() {
     return errors
   }
 
-  // Header prüfen
-  const header = lines[0].split('\t')
+  // Header prüfen. Ein BOM am Dateianfang wird entfernt – fetch-data.mjs
+  // akzeptiert es ebenfalls, sonst würde der Abruf die Datei durchlassen und
+  // erst dieser Schritt daran scheitern.
+  const header = lines[0].replace(/^\uFEFF/, '').split('\t')
   const expectedHeader = ['Saison', 'Kalenderwoche', 'Altersgruppe', 'SARI', 'Hospitalisierungsinzidenz']
   for (let i = 0; i < expectedHeader.length; i++) {
     if (header[i] !== expectedHeader[i]) {
@@ -118,6 +148,8 @@ function validate() {
 }
 
 function transform() {
+  const args = parseArgs(process.argv)
+
   console.log('🔍 Validiere TSV-Datei...')
   const errors = validate()
 
@@ -142,14 +174,14 @@ function transform() {
     const cols = lines[i].split('\t')
     const [season, week, ageGroup, sariType, incidence] = cols
 
-    const weekStartDate = parseCalendarWeek(week)
+    const weekStart = weekStartDate(week)
     const year = extractYearFromSeason(season)
     const incidenceNum = incidence !== '' ? parseFloat(incidence) : null
 
     dataPoints.push({
       season,
       kalenderwoche: week,
-      weekStartDate,
+      weekStartDate: weekStart,
       year,
       ageGroup,
       sariType,
@@ -157,15 +189,30 @@ function transform() {
     })
   }
 
+  // Metadaten für das Frontend: Zeitraum-Filter und Kopfzeile werden daraus
+  // erzeugt, statt Saisons im Code fest zu verdrahten.
+  const weeks = [...new Set(dataPoints.map((d) => d.kalenderwoche))].sort()
+  const latestWeek = weeks[weeks.length - 1] ?? null
+  const firstWeek = weeks[0] ?? null
+  const latestPoint = dataPoints.reduce(
+    (latest, point) => (latest === null || point.kalenderwoche > latest.kalenderwoche ? point : latest),
+    null
+  )
+
   const now = new Date().toISOString()
   const output = {
     lastUpdated: now,
+    dataStand: args['data-date'] ?? (latestWeek ? weekEndDate(latestWeek) : null),
+    latestWeek,
+    firstWeek,
+    latestSeason: latestPoint?.season ?? null,
     data: dataPoints,
   }
 
   writeFileSync(JSON_PATH, JSON.stringify(output, null, 2), 'utf-8')
   console.log(`✅ ${dataPoints.length} Datenpunkte geschrieben nach: ${JSON_PATH}`)
   console.log(`   Letztes Update: ${now}`)
+  console.log(`   Datenstand:     ${output.dataStand} (letzte KW: ${latestWeek})`)
 }
 
 transform()

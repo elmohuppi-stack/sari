@@ -137,19 +137,28 @@ const tableData = computed(() => {
   return filterStore.filteredData.slice(-100).reverse()
 })
 
-// Zeitraum-Optionen (Season-basiert)
-const timeRangeOptions: { value: TimeRange; label: string }[] = [
-  { value: '2025/26', label: '2025/26' },
-  { value: 'from-2024/25', label: 'ab 2024/25' },
-  { value: 'from-2023/24', label: 'ab 2023/24' },
-  { value: 'from-2022/23', label: 'ab 2022/23' },
-  { value: 'from-2021/22', label: 'ab 2021/22' },
-  { value: 'from-2020/21', label: 'ab 2020/21' },
-  { value: 'from-2019/20', label: 'ab 2019/20' },
-  { value: 'from-2018/19', label: 'ab 2018/19' },
-  { value: 'from-2017/18', label: 'ab 2017/18' },
-  { value: 'all', label: 'gesamter Zeitraum' },
-]
+// Der Filter zeigt auf einen Zeitraum ohne Daten. Kann passieren, wenn ein
+// gespeicherter Filter auf eine Saison zeigt, die nicht mehr in den Daten ist
+// (z.B. nach einem Datenwechsel). Ohne diesen Hinweis bliebe das Diagramm
+// einfach leer, ohne zu sagen warum.
+const noDataForFilter = computed(
+  () => dataStore.dataPoints.length > 0 && filterStore.filteredData.length === 0
+)
+
+// Zeitraum-Optionen: aus den geladenen Daten abgeleitet. Die aktuelle Saison
+// steht einzeln oben, danach "ab <Saison>" für jede Saison, dann "alles".
+// So erscheint eine neue Saison (z.B. 2026/27) automatisch im Filter,
+// sobald der Datenlauf sie geliefert hat – ohne Codeänderung.
+const timeRangeOptions = computed<{ value: TimeRange; label: string }[]>(() => {
+  const seasons = dataStore.seasons
+  if (seasons.length === 0) return [{ value: 'all', label: 'gesamter Zeitraum' }]
+
+  return [
+    { value: seasons[0] as TimeRange, label: `${seasons[0]} (aktuell)` },
+    ...seasons.map((season) => ({ value: `from-${season}` as TimeRange, label: `ab ${season}` })),
+    { value: 'all' as TimeRange, label: 'gesamter Zeitraum' },
+  ]
+})
 
 const ageGroupOptions: AgeGroup[] = ['00+', '0-4', '5-14', '15-34', '35-59', '60-79', '80+']
 const sariTypeOptions: SariType[] = ['Gesamt', 'COVID-19', 'Influenza', 'RSV']
@@ -241,6 +250,20 @@ const sariTypeOptions: SariType[] = ['Gesamt', 'COVID-19', 'Influenza', 'RSV']
       class="bg-red-50 rounded-lg border border-red-200 p-6 text-center text-red-700"
     >
       Fehler beim Laden der Daten: {{ dataStore.error }}
+    </div>
+
+    <!-- Filter passt auf keine Daten: Hinweis statt stumm leerem Diagramm -->
+    <div
+      v-else-if="noDataForFilter"
+      class="bg-amber-50 rounded-lg border border-amber-200 p-6 text-center text-amber-800"
+    >
+      Für die gewählte Kombination gibt es keine Daten.
+      <button
+        class="ml-1 underline hover:no-underline"
+        @click="filterStore.setFilter({ timeRange: 'all' })"
+      >
+        Gesamten Zeitraum anzeigen
+      </button>
     </div>
 
     <template v-else>

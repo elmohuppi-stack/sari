@@ -1,5 +1,40 @@
-# Vue 3 + TypeScript + Vite
+# SARI-Dashboard
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Visualisierung der SARI-Hospitalisierungsinzidenz des Robert Koch-Instituts
+(RKI) für Deutschland, pro 100.000 Einwohner, filterbar nach Zeitraum,
+Altersgruppe und SARI-Typ (Gesamt, COVID-19, Influenza, RSV).
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+Live: https://sari.elmarhepp.de
+
+## Daten
+
+Quelle ist der RKI-Datensatz „SARI-Hospitalisierungsinzidenz"
+(CC-BY-4.0): https://github.com/robert-koch-institut/SARI-Hospitalisierungsinzidenz
+
+Die Daten werden **wöchentlich automatisch** aktualisiert: eine GitHub Action
+holt jeden Mittwochmorgen die aktuelle TSV, wandelt sie in
+`data/sari-data.json` und deployt bei Änderungen auf den Server.
+
+Details zum Ablauf, zu den Schutzmechanismen und zur Einrichtung:
+[docs/datenpipeline.md](docs/datenpipeline.md)
+
+## Kommandos
+
+```bash
+make install        # Abhängigkeiten installieren
+make dev            # Entwicklungsserver
+make build          # Produktions-Build
+make update-data    # RKI-Daten holen und JSON neu erzeugen
+make data-report    # Datenstand anzeigen
+make all            # update-data + build
+make help           # alle Kommandos
+```
+
+## Aufbau
+
+- `src/` – Vue 3 + TypeScript + Pinia, Charts mit ECharts
+- `data/` – RKI-TSV und daraus erzeugte JSON (beides versioniert)
+- `scripts/` – Datenabruf und Transformation
+- `.github/workflows/update-data.yml` – wöchentlicher Datenlauf
+- `docs/` – Deployment-Standard, Datenpipeline, RKI-Dokumentation, Lizenz
+

@@ -1,0 +1,137 @@
+name: Daten aktualisieren
+
+# Holt jeden Mittwoch die aktuelle SARI-Hospitalisierungsinzidenz vom RKI,
+# wandelt sie in data/sari-data.json und deployt, wenn sich etwas geändert hat.
+#
+# Warum Mittwoch: Das RKI veröffentlicht die Vorwoche typischerweise am
+# Dienstag. Mittwochmorgen ist sie also sicher da, und ein Fehlschlag fällt
+# noch in derselben Woche auf.
+#
+# Warum ein Cron und nicht "bei jedem Push des RKI-Repos": beim RKI-Repo ist
+# unbekannt, ob und wann Pushes erfolgen; der Zeitplan ist die verlässlichere
+# Zusage. `workflow_dispatch` erlaubt zusätzlich den Handstart.
+#
+# Benötigte Secrets (nur für den Deploy-Schritt, Daten-Commit läuft ohne):
+#   SSH_HOST      – Server-IP oder Hostname
+#   SSH_USER      – Benutzer mit Zugriff auf /var/www/sari
+#   SSH_KEY       – privater Schlüssel (ed25519), passwortlos
+# Ohne diese Secrets wird nur committet; deployt wird dann von Hand auf dem
+# Server (`deploy-app.sh sari`).
+
+on:
+  schedule:
+    - cron: '0 6 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: RKI-Daten holen und deployen
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Die Scripts nutzen nur Node-Bordmittel (fetch, fs) – kein npm ci nötig.
+      #
+      # pipefail ist hier Pflicht: ohne die Option liefert die Pipe den
+      # Exit-Code von `tee` zurück, nicht von node. Ein fehlgeschlagener
+      # Datenabruf (Netzfehler, unplausible Datei) würde dann als Erfolg
+      # durchgehen und der Lauf endete grün mit alten Daten.
+      - name: RKI-Daten holen und nach JSON wandeln
+        id: data
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/update-data.mjs | tee /tmp/update.log
+          node scripts/data-report.mjs --github-output
+
+      - name: Änderungen prüfen
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Keine neuen Daten – Abbruch ohne Commit."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- data/
+          fi
+
+      - name: Daten committen und pushen
+        if: steps.diff.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/SARI-Hospitalisierungsinzidenz.tsv data/sari-data.json
+          git commit -m "Daten: RKI-Stand ${{ steps.data.outputs.data_stand }} (${{ steps.data.outputs.latest_week }})"
+          git push
+
+      # Der Deploy nutzt das vorhandene Server-Script, damit sari genauso
+      # aktualisiert wird wie bei jedem anderen Deploy: git pull + compose build.
+      #
+      # `secrets.*` ist im if-Ausdruck NICHT erlaubt ("Unrecognized named-value:
+      # secrets") – der Workflow würde schon beim Parsen scheitern und nie
+      # starten. Die Prüfung läuft deshalb als eigener Schritt über ein env:
+      # Secrets sind dort erlaubt, und der Schritt setzt ein Output.
+      - name: Deploy-Konfiguration prüfen
+        id: deploy_check
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          if [ -n "$SSH_HOST" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Keine SSH-Secrets gesetzt – nur Commit, kein Deploy."
+          fi
+
+      - name: Auf dem Server deployen
+        if: steps.diff.outputs.changed == 'true' && steps.deploy_check.outputs.enabled == 'true'
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" 'deploy-app.sh sari'
+
+      - name: Ergebnis zusammenfassen
+        if: always()
+        run: |
+          {
+            echo "### SARI-Datenlauf"
+            echo ""
+            echo "| Feld | Wert |"
+            echo "| --- | --- |"
+            echo "| Datenstand | ${{ steps.data.outputs.data_stand || '—' }} |"
+            echo "| Letzte Kalenderwoche | ${{ steps.data.outputs.latest_week || '—' }} |"
+            echo "| Datenpunkte | ${{ steps.data.outputs.data_points || '—' }} |"
+            echo "| Neu committet | ${{ steps.diff.outputs.changed || '—' }} |"
+            echo ""
+            echo "Letzte Zeilen:"
+            echo '```'
+            tail -n 12 /tmp/update.log 2>/dev/null || echo '(kein Log)'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

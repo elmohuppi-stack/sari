@@ -4,6 +4,9 @@ import type { FilterState, TimeRange, AgeGroup, SariType } from '@/types'
 import { useDataStore } from './dataStore'
 
 export const useFilterStore = defineStore('filter', () => {
+  // Standard ist "gesamter Zeitraum": so bleibt die Ansicht beim Öffnen
+  // unverändert, und es gibt keine fest verdrahtete Saison, die nach dem
+  // Saisonwechsel ins Leere zeigt.
   const timeRange = ref<TimeRange>('all')
   const ageGroup = ref<AgeGroup>('00+')
   const sariType = ref<SariType>('Gesamt')
