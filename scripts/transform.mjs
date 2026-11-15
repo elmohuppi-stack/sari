@@ -199,10 +199,28 @@ function transform() {
     null
   )
 
+  // Der Datenstand kommt von fetch-data.mjs (Sonntag der letzten KW) oder wird
+  // hier aus der letzten Kalenderwoche berechnet.
+  const dataStand = args['data-date'] ?? (latestWeek ? weekEndDate(latestWeek) : null)
+
+  // lastUpdated nur dann erneuern, wenn sich die Daten wirklich geändert haben.
+  // Sonst erzeugt jeder Lauf einen Diff aus einer einzigen Zeile, die Action
+  // committet und deployt wöchentlich ohne Anlass. dataStand und die
+  // Datenpunkte bleiben dabei identisch.
+  const previous = existsSync(JSON_PATH)
+    ? JSON.parse(readFileSync(JSON_PATH, 'utf-8'))
+    : null
+
+  const dataChanged =
+    previous === null ||
+    previous.dataStand !== dataStand ||
+    previous.latestWeek !== latestWeek ||
+    JSON.stringify(previous.data) !== JSON.stringify(dataPoints)
+
   const now = new Date().toISOString()
   const output = {
-    lastUpdated: now,
-    dataStand: args['data-date'] ?? (latestWeek ? weekEndDate(latestWeek) : null),
+    lastUpdated: dataChanged ? now : (previous?.lastUpdated ?? now),
+    dataStand,
     latestWeek,
     firstWeek,
     latestSeason: latestPoint?.season ?? null,
@@ -211,7 +229,11 @@ function transform() {
 
   writeFileSync(JSON_PATH, JSON.stringify(output, null, 2), 'utf-8')
   console.log(`✅ ${dataPoints.length} Datenpunkte geschrieben nach: ${JSON_PATH}`)
-  console.log(`   Letztes Update: ${now}`)
+  console.log(
+    dataChanged
+      ? `   Letztes Update: ${output.lastUpdated} (Daten geändert)`
+      : `   Letztes Update: ${output.lastUpdated} (unverändert – Zeitstempel beibehalten)`
+  )
   console.log(`   Datenstand:     ${output.dataStand} (letzte KW: ${latestWeek})`)
 }
 
