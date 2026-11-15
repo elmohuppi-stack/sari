@@ -65,7 +65,8 @@ Ablauf:
 2. `node scripts/update-data.mjs` – Daten holen, prüfen, JSON schreiben
 3. `git diff -- data/` – ohne Änderung endet der Lauf ohne Commit
 4. Bei Änderung: Commit + Push (`Daten: RKI-Stand <Datum> (<KW>)`)
-5. Optional: `deploy-app.sh sari` per SSH auf dem Server
+5. Optional: `git pull --ff-only && docker compose up -d --build` per SSH auf
+   dem Server (`/var/www/sari`)
 6. Zusammenfassung im Action-Log (Datenstand, KW, Anzahl Datenpunkte)
 
 **Warum Mittwoch:** Das RKI stellt die Vorwoche üblicherweise am Dienstag
@@ -80,10 +81,16 @@ bricht ohne Änderung nach wenigen Sekunden ab.
 
 **Daten-Commit ohne Deploy:** Ohne die Secrets `SSH_HOST`, `SSH_USER`,
 `SSH_KEY` wird nur committet. Der Server zieht die Daten dann erst beim
-nächsten `deploy-app.sh sari` (oder `git pull && docker compose up -d --build`).
-Secrets eintragen unter: Settings → Secrets and variables → Actions.
-Ohne Deploy-Schritt bleibt der Server auf dem alten Stand – deshalb ist der
-Deploy-Schritt für „läuft von allein" notwendig.
+nächsten Deploy (siehe unten). Secrets eintragen unter: Settings → Secrets and
+variables → Actions. Ohne Deploy-Schritt bleibt der Server auf dem alten Stand
+– deshalb ist der Deploy-Schritt für „läuft von allein" notwendig.
+
+**Deploy-Befehl:** `git pull --ff-only && docker compose up -d --build` in
+`/var/www/sari`. Ein zentrales `deploy-app.sh`, wie es
+`docs/deployment-standard.md` beschreibt, gibt es auf dem Server nicht
+(geprüft am 15.11.2026: `/usr/local/bin` ist leer). Die anderen Apps bringen
+jeweils ein eigenes `deploy.sh` im App-Verzeichnis mit; sari hat keins, deshalb
+steht die Befehlsfolge direkt im Workflow.
 
 Zwei Fallen sind im Workflow bewusst umgangen, weil sie einen Lauf still
 scheitern lassen:
@@ -95,6 +102,13 @@ scheitern lassen:
 - `node … | tee` ohne `pipefail` liefert den Exit-Code von `tee` statt von
   `node`. Ein fehlgeschlagener Abruf ginge als Erfolg durch, der Lauf endete
   grün mit alten Daten. Alle `run`-Blöcke setzen deshalb `set -euo pipefail`.
+
+**Deploy von Hand** (so wurde der Stand vom 15.11.2026 ausgeliefert):
+
+```bash
+ssh elmarhepp 'cd /var/www/sari && git pull --ff-only && docker compose up -d --build'
+curl -s https://sari.elmarhepp.de/data/sari-data.json | head -8   # dataStand prüfen
+```
 
 ## Lokal arbeiten
 

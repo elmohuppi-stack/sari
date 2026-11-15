@@ -11,12 +11,17 @@ name: Daten aktualisieren
 # unbekannt, ob und wann Pushes erfolgen; der Zeitplan ist die verlässlichere
 # Zusage. `workflow_dispatch` erlaubt zusätzlich den Handstart.
 #
+# Deploy: auf dem Server liegen die Apps unter /var/www/<slug> und werden mit
+# `git pull` + `docker compose up -d --build` aktualisiert. Ein zentrales
+# deploy-app.sh gibt es dort NICHT (geprüft am 15.11.2026, /usr/local/bin ist
+# leer) – die anderen Apps bringen ein eigenes deploy.sh im App-Verzeichnis mit.
+#
 # Benötigte Secrets (nur für den Deploy-Schritt, Daten-Commit läuft ohne):
 #   SSH_HOST      – Server-IP oder Hostname
 #   SSH_USER      – Benutzer mit Zugriff auf /var/www/sari
 #   SSH_KEY       – privater Schlüssel (ed25519), passwortlos
 # Ohne diese Secrets wird nur committet; deployt wird dann von Hand auf dem
-# Server (`deploy-app.sh sari`).
+# Server.
 
 on:
   schedule:
@@ -83,9 +88,6 @@ jobs:
           git commit -m "Daten: RKI-Stand ${{ steps.data.outputs.data_stand }} (${{ steps.data.outputs.latest_week }})"
           git push
 
-      # Der Deploy nutzt das vorhandene Server-Script, damit sari genauso
-      # aktualisiert wird wie bei jedem anderen Deploy: git pull + compose build.
-      #
       # `secrets.*` ist im if-Ausdruck NICHT erlaubt ("Unrecognized named-value:
       # secrets") – der Workflow würde schon beim Parsen scheitern und nie
       # starten. Die Prüfung läuft deshalb als eigener Schritt über ein env:
@@ -102,6 +104,10 @@ jobs:
             echo "::notice::Keine SSH-Secrets gesetzt – nur Commit, kein Deploy."
           fi
 
+      # Der Deploy läuft direkt über die Befehlsfolge, die auch von Hand auf dem
+      # Server genutzt wird. Vorher rief dieser Schritt `deploy-app.sh sari` auf
+      # – das Script existiert auf dem Server nicht, der Lauf wäre jede Woche
+      # im Deploy-Schritt gescheitert.
       - name: Auf dem Server deployen
         if: steps.diff.outputs.changed == 'true' && steps.deploy_check.outputs.enabled == 'true'
         env:
@@ -115,7 +121,8 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" 'deploy-app.sh sari'
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+            'cd /var/www/sari && git pull --ff-only && docker compose up -d --build'
 
       - name: Ergebnis zusammenfassen
         if: always()
