@@ -11,17 +11,17 @@ name: Daten aktualisieren
 # unbekannt, ob und wann Pushes erfolgen; der Zeitplan ist die verlässlichere
 # Zusage. `workflow_dispatch` erlaubt zusätzlich den Handstart.
 #
-# Deploy: auf dem Server liegen die Apps unter /var/www/<slug> und werden mit
-# `git pull` + `docker compose up -d --build` aktualisiert. Ein zentrales
-# deploy-app.sh gibt es dort NICHT (geprüft am 15.11.2026, /usr/local/bin ist
-# leer) – die anderen Apps bringen ein eigenes deploy.sh im App-Verzeichnis mit.
+# Deploy: die App wird über ihr eigenes deploy.sh aktualisiert, so wie alle
+# anderen Apps auf dem Server (mediathek, knora, wetter). Das Skript liegt im
+# Repository, muss also vor dem Aufruf auf dem Server vorhanden sein – der
+# `git pull` davor holt es mit.
 #
 # Benötigte Secrets (nur für den Deploy-Schritt, Daten-Commit läuft ohne):
 #   SSH_HOST      – Server-IP oder Hostname
 #   SSH_USER      – Benutzer mit Zugriff auf /var/www/sari
 #   SSH_KEY       – privater Schlüssel (ed25519), passwortlos
-# Ohne diese Secrets wird nur committet; deployt wird dann von Hand auf dem
-# Server.
+# Ohne diese Secrets wird nur committet; deployt wird dann von Hand
+# (`./deploy.sh`).
 
 on:
   schedule:
@@ -104,10 +104,9 @@ jobs:
             echo "::notice::Keine SSH-Secrets gesetzt – nur Commit, kein Deploy."
           fi
 
-      # Der Deploy läuft direkt über die Befehlsfolge, die auch von Hand auf dem
-      # Server genutzt wird. Vorher rief dieser Schritt `deploy-app.sh sari` auf
-      # – das Script existiert auf dem Server nicht, der Lauf wäre jede Woche
-      # im Deploy-Schritt gescheitert.
+      # deploy.sh ruft selbst `git pull` auf und baut neu. Der Aufruf braucht
+      # kein vorheriges Pull: das Skript wird aus dem bereits gepullten
+      # Checkout gestartet, den der Schritt davor aktualisiert hat.
       - name: Auf dem Server deployen
         if: steps.diff.outputs.changed == 'true' && steps.deploy_check.outputs.enabled == 'true'
         env:
@@ -122,7 +121,7 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
-            'cd /var/www/sari && git pull --ff-only && docker compose up -d --build'
+            'cd /var/www/sari && git pull --ff-only && ./deploy.sh deploy'
 
       - name: Ergebnis zusammenfassen
         if: always()

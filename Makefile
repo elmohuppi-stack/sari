@@ -1,4 +1,4 @@
-.PHONY: help install dev build preview fetch-data transform update-data data-report all clean
+.PHONY: help install dev build preview fetch-data transform update-data data-report deploy status logs all clean
 
 # ─── Hilfe ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +17,9 @@ help:
 	@echo "  make fetch-data   nur die TSV vom RKI holen"
 	@echo "  make transform    nur die vorhandene TSV nach JSON wandeln"
 	@echo "  make data-report  Datenstand im JSON anzeigen"
+	@echo "  make deploy       auf den Server deployen (./deploy.sh)"
+	@echo "  make status       Container-Status auf dem Server"
+	@echo "  make logs         Container-Logs auf dem Server"
 	@echo "  make all          update-data + build in einem Schritt"
 	@echo "  make clean        node_modules und dist löschen"
 	@echo "  make help         Diese Hilfe anzeigen"
@@ -47,6 +50,15 @@ transform:
 
 data-report:
 	npm run data-report
+
+deploy:
+	./deploy.sh deploy
+
+status:
+	./deploy.sh status
+
+logs:
+	./deploy.sh logs
 
 all: update-data build
 

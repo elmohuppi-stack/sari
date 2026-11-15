@@ -28,6 +28,9 @@ make update-data    # RKI-Daten holen und JSON neu erzeugen
 make data-report    # Datenstand anzeigen
 make all            # update-data + build
 make help           # alle Kommandos
+
+./deploy.sh         # deployen (pull, rebuild, Verifikation)
+./deploy.sh status  # Container-Status, logs, rebuild, rollback
 ```
 
 ## Aufbau
@@ -35,6 +38,7 @@ make help           # alle Kommandos
 - `src/` – Vue 3 + TypeScript + Pinia, Charts mit ECharts
 - `data/` – RKI-TSV und daraus erzeugte JSON (beides versioniert)
 - `scripts/` – Datenabruf und Transformation
+- `deploy.sh` – Deployment auf den Server (wie bei den anderen Apps)
 - `.github/workflows/update-data.yml` – wöchentlicher Datenlauf
 - `docs/` – Deployment-Standard, Datenpipeline, RKI-Dokumentation, Lizenz
 

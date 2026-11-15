@@ -65,8 +65,7 @@ Ablauf:
 2. `node scripts/update-data.mjs` – Daten holen, prüfen, JSON schreiben
 3. `git diff -- data/` – ohne Änderung endet der Lauf ohne Commit
 4. Bei Änderung: Commit + Push (`Daten: RKI-Stand <Datum> (<KW>)`)
-5. Optional: `git pull --ff-only && docker compose up -d --build` per SSH auf
-   dem Server (`/var/www/sari`)
+5. Optional: `./deploy.sh deploy` per SSH auf dem Server (`/var/www/sari`)
 6. Zusammenfassung im Action-Log (Datenstand, KW, Anzahl Datenpunkte)
 
 **Warum Mittwoch:** Das RKI stellt die Vorwoche üblicherweise am Dienstag
@@ -85,12 +84,9 @@ nächsten Deploy (siehe unten). Secrets eintragen unter: Settings → Secrets an
 variables → Actions. Ohne Deploy-Schritt bleibt der Server auf dem alten Stand
 – deshalb ist der Deploy-Schritt für „läuft von allein" notwendig.
 
-**Deploy-Befehl:** `git pull --ff-only && docker compose up -d --build` in
-`/var/www/sari`. Ein zentrales `deploy-app.sh`, wie es
-`docs/deployment-standard.md` beschreibt, gibt es auf dem Server nicht
-(geprüft am 15.11.2026: `/usr/local/bin` ist leer). Die anderen Apps bringen
-jeweils ein eigenes `deploy.sh` im App-Verzeichnis mit; sari hat keins, deshalb
-steht die Befehlsfolge direkt im Workflow.
+**Deploy-Methode:** über `deploy.sh` im App-Verzeichnis, wie bei den anderen
+Apps auf dem Server (mediathek, knora, wetter). Details im Abschnitt
+[Deploy](#deploy) unten.
 
 Zwei Fallen sind im Workflow bewusst umgangen, weil sie einen Lauf still
 scheitern lassen:
@@ -103,12 +99,34 @@ scheitern lassen:
   `node`. Ein fehlgeschlagener Abruf ginge als Erfolg durch, der Lauf endete
   grün mit alten Daten. Alle `run`-Blöcke setzen deshalb `set -euo pipefail`.
 
-**Deploy von Hand** (so wurde der Stand vom 15.11.2026 ausgeliefert):
+## Deploy
+
+sari wird wie die anderen Apps auf dem Server über ein `deploy.sh` im
+App-Verzeichnis deployt. Das Skript liegt im Repository und funktioniert lokal
+wie auf dem Server:
 
 ```bash
-ssh elmarhepp 'cd /var/www/sari && git pull --ff-only && docker compose up -d --build'
-curl -s https://sari.elmarhepp.de/data/sari-data.json | head -8   # dataStand prüfen
+./deploy.sh              # deployt origin/main: pull, rebuild, Verifikation
+./deploy.sh status       # Container-Status
+./deploy.sh logs         # Container-Logs (folgt, Strg+C beendet)
+./deploy.sh rebuild      # Rebuild ohne Cache
+./deploy.sh rollback     # ein Commit zurück
 ```
+
+`DEPLOY_HOST` ist per Default `elmarhepp` (aus `~/.ssh/config`), `DEPLOY_BRANCH`
+default `main`. Beides lässt sich überschreiben:
+
+```bash
+DEPLOY_HOST=elmarhepp DEPLOY_BRANCH=main ./deploy.sh
+```
+
+Der Deploy prüft am Ende selbst, ob die Seite antwortet (HTTP-Code) und welcher
+Datenstand ausgeliefert wird. Ein Lauf, der „durchläuft", aber alte Daten zeigt,
+fällt damit sofort auf – genau der Fall, der im Mai 2026 unbemerkt passiert ist.
+
+Ein zentrales `deploy-app.sh`, wie es `docs/deployment-standard.md` beschreibt,
+gibt es auf dem Server nicht (geprüft am 15.11.2026: `/usr/local/bin` ist leer).
+Maßgeblich ist das `deploy.sh` im jeweiligen App-Verzeichnis.
 
 ## Lokal arbeiten
 
