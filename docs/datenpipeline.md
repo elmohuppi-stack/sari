@@ -120,6 +120,46 @@ default `main`. Beides lässt sich überschreiben:
 DEPLOY_HOST=elmarhepp DEPLOY_BRANCH=main ./deploy.sh
 ```
 
+### Deploy-Key für die GitHub Action
+
+Der automatische Deploy braucht einen eigenen SSH-Key, nicht den persönlichen
+des Rechners. Eingerichtet am 15.11.2026:
+
+```bash
+# 1. Key erzeugen (ohne Passphrase – die Action kann keine eingeben)
+ssh-keygen -t ed25519 -C "github-actions@sari" -f ~/.ssh/sari-deploy -N ""
+
+# 2. Public Key auf den Server  (>> nicht > – bestehende Keys bleiben erhalten)
+cat ~/.ssh/sari-deploy.pub | ssh elmarhepp 'cat >> ~/.ssh/authorized_keys'
+
+# 3. Privaten Key in die GitHub-Secrets legen
+pbcopy < ~/.ssh/sari-deploy      # dann im Browser bei SSH_KEY einfügen
+```
+
+Fingerprint zum Abgleich: `SHA256:rt+SLA5ETtUdxXeL8ZdL1mm+oSkp/9/Pjr1HjmW3NEk`
+
+Die drei Repository-Secrets liegen unter
+`https://github.com/elmohuppi-stack/sari/settings/secrets/actions`:
+
+| Secret | Wert |
+| --- | --- |
+| `SSH_HOST` | `159.195.214.166` |
+| `SSH_USER` | `root` |
+| `SSH_KEY` | Inhalt von `~/.ssh/sari-deploy` (privat, komplett) |
+
+Gegenprobe, ob Key und Server zusammenpassen – genau der Befehl, den die
+Action ausführt:
+
+```bash
+ssh -i ~/.ssh/sari-deploy -o IdentitiesOnly=yes elmarhepp \
+  'cd /var/www/sari && git pull --ff-only && ./deploy.sh deploy'
+```
+
+Der Server erlaubt `permitrootlogin without-password` bei
+`passwordauthentication no` – ein Key ist also zwingend, ein Passwort hilft
+nicht weiter. Bei einer Fehlermeldung `Permission denied (publickey)` fehlt
+der Public Key in `/root/.ssh/authorized_keys`.
+
 Der Deploy prüft am Ende selbst, ob die Seite antwortet (HTTP-Code) und welcher
 Datenstand ausgeliefert wird. Ein Lauf, der „durchläuft", aber alte Daten zeigt,
 fällt damit sofort auf – genau der Fall, der im Mai 2026 unbemerkt passiert ist.
