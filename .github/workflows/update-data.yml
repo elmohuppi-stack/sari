@@ -1,11 +1,20 @@
 name: Daten aktualisieren
 
-# Holt jeden Mittwoch die aktuelle SARI-Hospitalisierungsinzidenz vom RKI,
-# wandelt sie in data/sari-data.json und deployt, wenn sich etwas geändert hat.
+# Holt die aktuelle SARI-Hospitalisierungsinzidenz vom RKI, wandelt sie in
+# data/sari-data.json und deployt, wenn Daten oder Code auf dem Server fehlen.
 #
-# Warum Mittwoch: Das RKI veröffentlicht die Vorwoche typischerweise am
-# Dienstag. Mittwochmorgen ist sie also sicher da, und ein Fehlschlag fällt
-# noch in derselben Woche auf.
+# Zwei Termine pro Woche – Mittwoch und Freitag:
+#   Mittwoch  Das RKI veröffentlicht die Vorwoche typischerweise am Dienstag,
+#             Mittwochmorgen ist sie also meistens da. Ein Fehlschlag fällt
+#             noch in derselben Woche auf.
+#   Freitag   Der Puffer ist nötig: am 18.11.2026 lief der Mittwochslauf um
+#             06:00 UTC, das RKI hatte die KW 46 noch nicht veröffentlicht –
+#             der Lauf endete grün mit "Keine Änderung" und die Seite blieb
+#             eine Woche auf dem alten Stand. Der zweite Lauf holt so einen
+#             verspäteten RKI-Push nach. Er kostet nichts: ohne neue Daten ist
+#             das Ergebnis byte-identisch, es gibt keinen Commit und keinen
+#             Deploy (siehe Commit "transform: Zeitstempel nur bei echten
+#             Datenänderungen erneuern").
 #
 # Warum ein Cron und nicht "bei jedem Push des RKI-Repos": beim RKI-Repo ist
 # unbekannt, ob und wann Pushes erfolgen; der Zeitplan ist die verlässlichere
@@ -16,6 +25,12 @@ name: Daten aktualisieren
 # Repository, muss also vor dem Aufruf auf dem Server vorhanden sein – der
 # `git pull` davor holt es mit.
 #
+# Deploy-Auslöser ist NICHT der Daten-Diff, sondern der Server-Stand: deployt
+# wird, wenn /var/www/sari hinter origin/main liegt. So kommt auch eine reine
+# Code-Änderung ohne neue Daten an (vorher wurde sie nie automatisch
+# ausgeliefert, weil der Commit-Schritt an `changed` hing) und ein
+# fehlgeschlagener Deploy wird beim nächsten Lauf nachgeholt.
+#
 # Benötigte Secrets (nur für den Deploy-Schritt, Daten-Commit läuft ohne):
 #   SSH_HOST      – Server-IP oder Hostname
 #   SSH_USER      – Benutzer mit Zugriff auf /var/www/sari
@@ -25,7 +40,8 @@ name: Daten aktualisieren
 
 on:
   schedule:
-    - cron: '0 6 * * 3'
+    - cron: '0 6 * * 3'   # Mittwoch 06:00 UTC
+    - cron: '0 6 * * 5'   # Freitag 06:00 UTC – Nachlauf für verspätete RKI-Pushes
   workflow_dispatch:
 
 permissions:
@@ -96,22 +112,19 @@ jobs:
         id: deploy_check
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
         run: |
-          if [ -n "$SSH_HOST" ]; then
+          if [ -n "$SSH_HOST" ] && [ -n "$SSH_USER" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Keine SSH-Secrets gesetzt – nur Commit, kein Deploy."
           fi
 
-      # deploy.sh ruft selbst `git pull` auf und baut neu. Der Aufruf braucht
-      # kein vorheriges Pull: das Skript wird aus dem bereits gepullten
-      # Checkout gestartet, den der Schritt davor aktualisiert hat.
-      - name: Auf dem Server deployen
-        if: steps.diff.outputs.changed == 'true' && steps.deploy_check.outputs.enabled == 'true'
+      - name: SSH-Schlüssel einrichten
+        if: steps.deploy_check.outputs.enabled == 'true'
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
         shell: bash
         run: |
@@ -119,8 +132,54 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      # Deploy-Auslöser ist der Server-Stand, nicht der Daten-Diff. Verglichen
+      # wird der Commit in /var/www/sari mit origin/main – also danach, ob es
+      # überhaupt etwas auszuliefern gibt:
+      #   - neue Daten (der Commit-Schritt davor hat gerade gepusht)
+      #   - reine Code-Änderung ohne neue Daten
+      #   - ein Deploy, der beim letzten Lauf fehlgeschlagen ist
+      # Der Vergleich ist bewusst nicht strikt: git pull im Deploy-Schritt darf
+      # einen Force-Push oder einen Rebase von main weiterhin ff-only holen.
+      # Kein `set -e`: der Schritt soll immer ein Output setzen.
+      - name: Server-Stand prüfen
+        id: remote_check
+        if: steps.deploy_check.outputs.enabled == 'true'
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        shell: bash
+        run: |
+          if remote_head=$(ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+               "$SSH_USER@$SSH_HOST" 'cd /var/www/sari && git fetch -q origin main && git rev-parse HEAD'); then
+            echo "remote_head=$remote_head" >> "$GITHUB_OUTPUT"
+            if [ "$remote_head" = "$GITHUB_SHA" ]; then
+              echo "needed=false" >> "$GITHUB_OUTPUT"
+              echo "Server läuft bereits auf $GITHUB_SHA – kein Deploy nötig."
+            else
+              echo "needed=true" >> "$GITHUB_OUTPUT"
+              echo "Server steht auf $remote_head, origin/main ist $GITHUB_SHA – Deploy nötig."
+            fi
+          else
+            # Unbekannter Stand: lieber deployen als stillschweigend nichts tun.
+            echo "::warning::Server-Stand nicht abfragbar – Deploy wird versucht."
+            echo "remote_head=unbekannt" >> "$GITHUB_OUTPUT"
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # deploy.sh ruft selbst `git pull` auf und baut neu. Der Aufruf braucht
+      # kein vorheriges Pull: das Skript wird aus dem bereits gepullten
+      # Checkout gestartet, den der Schritt davor aktualisiert hat.
+      - name: Auf dem Server deployen
+        if: steps.remote_check.outputs.needed == 'true'
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes "$SSH_USER@$SSH_HOST" \
             'cd /var/www/sari && git pull --ff-only && ./deploy.sh deploy'
 
       - name: Ergebnis zusammenfassen
@@ -135,9 +194,12 @@ jobs:
             echo "| Letzte Kalenderwoche | ${{ steps.data.outputs.latest_week || '—' }} |"
             echo "| Datenpunkte | ${{ steps.data.outputs.data_points || '—' }} |"
             echo "| Neu committet | ${{ steps.diff.outputs.changed || '—' }} |"
+            echo "| Server-Commit vor dem Lauf | ${{ steps.remote_check.outputs.remote_head || '—' }} |"
+            echo "| Deploy | ${{ steps.remote_check.outputs.needed == 'true' && 'ausgeführt' || (steps.deploy_check.outputs.enabled == 'true' && 'nicht nötig' || 'übersprungen (keine SSH-Secrets)') }} |"
             echo ""
             echo "Letzte Zeilen:"
             echo '```'
             tail -n 12 /tmp/update.log 2>/dev/null || echo '(kein Log)'
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+

@@ -55,28 +55,47 @@ Das Frontend zeigt beides getrennt an (Kopfzeile und Footer).
 
 ## Wöchentliche Automatisierung
 
-`.github/workflows/update-data.yml` läuft **jeden Mittwoch um 06:00 UTC**
-(08:00 bzw. 07:00 deutsche Zeit, je nach Sommerzeit) und zusätzlich per
-`workflow_dispatch` von Hand.
+`.github/workflows/update-data.yml` läuft **jeden Mittwoch und jeden Freitag
+um 06:00 UTC** (08:00 bzw. 07:00 deutsche Zeit, je nach Sommerzeit) und
+zusätzlich per `workflow_dispatch` von Hand.
 
 Ablauf:
 
 1. Repository auschecken, Node 22
 2. `node scripts/update-data.mjs` – Daten holen, prüfen, JSON schreiben
-3. `git diff -- data/` – ohne Änderung endet der Lauf ohne Commit
+3. `git diff -- data/` – ohne Änderung kein Commit
 4. Bei Änderung: Commit + Push (`Daten: RKI-Stand <Datum> (<KW>)`)
-5. Optional: `./deploy.sh deploy` per SSH auf dem Server (`/var/www/sari`)
-6. Zusammenfassung im Action-Log (Datenstand, KW, Anzahl Datenpunkte)
+5. Server-Stand prüfen: steht `/var/www/sari` auf einem anderen Commit als
+   `origin/main`?
+6. Wenn ja: `./deploy.sh deploy` per SSH auf dem Server (`/var/www/sari`)
+7. Zusammenfassung im Action-Log (Datenstand, KW, Anzahl Datenpunkte,
+   Server-Commit vor dem Lauf, ob deployt wurde)
 
 **Warum Mittwoch:** Das RKI stellt die Vorwoche üblicherweise am Dienstag
-bereit. Mittwochmorgen ist sie zuverlässig da, und ein Fehlschlag fällt noch
-in derselben Woche auf.
+bereit. Mittwochmorgen ist sie meistens da, und ein Fehlschlag fällt noch in
+derselben Woche auf.
+
+**Warum zusätzlich Freitag:** Der Mittwochstermin ist zu knapp, wenn das RKI
+später veröffentlicht. Am 18.11.2026 lief der Lauf um 06:00 UTC, die KW 46 war
+noch nicht online – der Lauf endete grün mit „Keine Änderung", ohne Commit und
+ohne Deploy, und die Seite blieb eine Woche auf dem alten Stand. Der
+Freitagslauf holt einen verspäteten RKI-Push nach. Er kostet nichts: ohne neue
+Daten ist die JSON byte-identisch (`lastUpdated` bleibt stehen), es gibt keinen
+Commit – und ohne Abweichung zwischen Server und `origin/main` auch keinen
+Deploy.
 
 **Warum ein Zeitplan und kein Trigger auf das RKI-Repo:** Ob und wann dort
 Pushes erfolgen, ist nicht zugesichert. Der Zeitplan ist die verlässlichere
-Zusage. Ein zusätzlicher `schedule`-Eintrag (z.B. Freitag) wäre möglich, falls
-Nachmeldungen schneller sichtbar werden sollen – der Lauf ist idempotent und
-bricht ohne Änderung nach wenigen Sekunden ab.
+Zusage.
+
+**Deploy hängt am Server-Stand, nicht am Daten-Diff:** Der frühere Auslöser
+`changed == 'true'` hatte zwei Lücken – eine reine Code-Änderung ohne neue
+Daten wurde nie automatisch ausgeliefert, und ein fehlgeschlagener Deploy
+konnte bis zur nächsten Datenänderung liegen bleiben. Jetzt vergleicht der
+Schritt „Server-Stand prüfen" den Commit auf dem Server mit dem Lauf-Commit;
+deployt wird, wenn beide abweichen. Ist der Server nicht abfragbar (SSH
+gestört), wird deployt statt geschwiegen – besser ein überflüssiger
+`docker compose up -d --build` als eine Woche alte Daten.
 
 **Daten-Commit ohne Deploy:** Ohne die Secrets `SSH_HOST`, `SSH_USER`,
 `SSH_KEY` wird nur committet. Der Server zieht die Daten dann erst beim

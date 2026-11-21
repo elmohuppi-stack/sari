@@ -12,8 +12,9 @@ Quelle ist der RKI-Datensatz „SARI-Hospitalisierungsinzidenz"
 (CC-BY-4.0): https://github.com/robert-koch-institut/SARI-Hospitalisierungsinzidenz
 
 Die Daten werden **wöchentlich automatisch** aktualisiert: eine GitHub Action
-holt jeden Mittwochmorgen die aktuelle TSV, wandelt sie in
-`data/sari-data.json` und deployt bei Änderungen auf den Server.
+holt jeden Mittwoch- und Freitagmorgen die aktuelle TSV, wandelt sie in
+`data/sari-data.json`, committet Änderungen und deployt auf den Server, sobald
+dieser hinter `origin/main` liegt.
 
 Details zum Ablauf, zu den Schutzmechanismen und zur Einrichtung:
 [docs/datenpipeline.md](docs/datenpipeline.md)
