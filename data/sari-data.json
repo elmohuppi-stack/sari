@@ -1,10 +1,118 @@
 {
-  "lastUpdated": "2026-11-15T13:10:41.692Z",
-  "dataStand": "2026-11-08",
-  "latestWeek": "2026-W45",
+  "lastUpdated": "2026-11-25T16:47:33.600Z",
+  "dataStand": "2026-11-15",
+  "latestWeek": "2026-W46",
   "firstWeek": "2014-W40",
   "latestSeason": "2026/27",
   "data": [
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "0-4",
+      "sariType": "Gesamt",
+      "incidence": 18.8
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "5-14",
+      "sariType": "Gesamt",
+      "incidence": 2.8
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "15-34",
+      "sariType": "Gesamt",
+      "incidence": 0.7
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "35-59",
+      "sariType": "Gesamt",
+      "incidence": 3.3
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "60-79",
+      "sariType": "Gesamt",
+      "incidence": 12.9
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "80+",
+      "sariType": "Gesamt",
+      "incidence": 35.5
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "00+",
+      "sariType": "Gesamt",
+      "incidence": 8.6
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "60-79",
+      "sariType": "COVID-19",
+      "incidence": 0.5
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "80+",
+      "sariType": "COVID-19",
+      "incidence": 3.1
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "00+",
+      "sariType": "COVID-19",
+      "incidence": 0.4
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "00+",
+      "sariType": "Influenza",
+      "incidence": 0.6
+    },
+    {
+      "season": "2026/27",
+      "kalenderwoche": "2026-W46",
+      "weekStartDate": "2026-11-09",
+      "year": 2026,
+      "ageGroup": "00+",
+      "sariType": "RSV",
+      "incidence": 0
+    },
     {
       "season": "2026/27",
       "kalenderwoche": "2026-W45",
@@ -12,7 +120,7 @@
       "year": 2026,
       "ageGroup": "0-4",
       "sariType": "Gesamt",
-      "incidence": 18.8
+      "incidence": 22.6
     },
     {
       "season": "2026/27",
@@ -21,7 +129,7 @@
       "year": 2026,
       "ageGroup": "5-14",
       "sariType": "Gesamt",
-      "incidence": 2.8
+      "incidence": 3.5
     },
     {
       "season": "2026/27",
@@ -30,7 +138,7 @@
       "year": 2026,
       "ageGroup": "15-34",
       "sariType": "Gesamt",
-      "incidence": 0.7
+      "incidence": 1
     },
     {
       "season": "2026/27",
@@ -39,7 +147,7 @@
       "year": 2026,
       "ageGroup": "35-59",
       "sariType": "Gesamt",
-      "incidence": 2.4
+      "incidence": 2.8
     },
     {
       "season": "2026/27",
@@ -48,7 +156,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 10.9
+      "incidence": 12.1
     },
     {
       "season": "2026/27",
@@ -57,7 +165,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 38.3
+      "incidence": 39.7
     },
     {
       "season": "2026/27",
@@ -66,7 +174,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 8.1
+      "incidence": 8.9
     },
     {
       "season": "2026/27",
@@ -84,7 +192,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "COVID-19",
-      "incidence": 1.7
+      "incidence": 2
     },
     {
       "season": "2026/27",
@@ -102,7 +210,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Influenza",
-      "incidence": 0.3
+      "incidence": 0.5
     },
     {
       "season": "2026/27",
@@ -120,7 +228,7 @@
       "year": 2026,
       "ageGroup": "0-4",
       "sariType": "Gesamt",
-      "incidence": 26.3
+      "incidence": 27.8
     },
     {
       "season": "2026/27",
@@ -129,7 +237,7 @@
       "year": 2026,
       "ageGroup": "5-14",
       "sariType": "Gesamt",
-      "incidence": 2.1
+      "incidence": 2.5
     },
     {
       "season": "2026/27",
@@ -138,7 +246,7 @@
       "year": 2026,
       "ageGroup": "15-34",
       "sariType": "Gesamt",
-      "incidence": 2.2
+      "incidence": 2.3
     },
     {
       "season": "2026/27",
@@ -156,7 +264,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 11.9
+      "incidence": 13
     },
     {
       "season": "2026/27",
@@ -165,7 +273,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 42.8
+      "incidence": 41.7
     },
     {
       "season": "2026/27",
@@ -174,7 +282,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 9.6
+      "incidence": 9.9
     },
     {
       "season": "2026/27",
@@ -183,7 +291,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "COVID-19",
-      "incidence": 0.4
+      "incidence": 0.5
     },
     {
       "season": "2026/27",
@@ -210,7 +318,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Influenza",
-      "incidence": 0.3
+      "incidence": 0.4
     },
     {
       "season": "2026/27",
@@ -228,7 +336,7 @@
       "year": 2026,
       "ageGroup": "0-4",
       "sariType": "Gesamt",
-      "incidence": 32
+      "incidence": 32.5
     },
     {
       "season": "2026/27",
@@ -255,7 +363,7 @@
       "year": 2026,
       "ageGroup": "35-59",
       "sariType": "Gesamt",
-      "incidence": 3
+      "incidence": 3.1
     },
     {
       "season": "2026/27",
@@ -264,7 +372,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 12.8
+      "incidence": 13.1
     },
     {
       "season": "2026/27",
@@ -273,7 +381,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 42.2
+      "incidence": 43.1
     },
     {
       "season": "2026/27",
@@ -282,7 +390,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 10
+      "incidence": 10.1
     },
     {
       "season": "2026/27",
@@ -300,7 +408,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "COVID-19",
-      "incidence": 0.8
+      "incidence": 1.1
     },
     {
       "season": "2026/27",
@@ -318,7 +426,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Influenza",
-      "incidence": 0.3
+      "incidence": 0.4
     },
     {
       "season": "2026/27",
@@ -336,7 +444,7 @@
       "year": 2026,
       "ageGroup": "0-4",
       "sariType": "Gesamt",
-      "incidence": 31.1
+      "incidence": 31.5
     },
     {
       "season": "2026/27",
@@ -354,7 +462,7 @@
       "year": 2026,
       "ageGroup": "15-34",
       "sariType": "Gesamt",
-      "incidence": 2.1
+      "incidence": 1.9
     },
     {
       "season": "2026/27",
@@ -363,7 +471,7 @@
       "year": 2026,
       "ageGroup": "35-59",
       "sariType": "Gesamt",
-      "incidence": 3.3
+      "incidence": 3.5
     },
     {
       "season": "2026/27",
@@ -381,7 +489,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 41.4
+      "incidence": 40
     },
     {
       "season": "2026/27",
@@ -480,7 +588,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 12.7
+      "incidence": 12.6
     },
     {
       "season": "2026/27",
@@ -489,7 +597,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 42.8
+      "incidence": 42.2
     },
     {
       "season": "2026/27",
@@ -498,7 +606,7 @@
       "year": 2026,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 9.9
+      "incidence": 9.8
     },
     {
       "season": "2026/27",
@@ -588,7 +696,7 @@
       "year": 2026,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 12.9
+      "incidence": 12.8
     },
     {
       "season": "2026/27",
@@ -597,7 +705,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 40.6
+      "incidence": 40.3
     },
     {
       "season": "2026/27",
@@ -624,7 +732,7 @@
       "year": 2026,
       "ageGroup": "80+",
       "sariType": "COVID-19",
-      "incidence": 0.3
+      "incidence": 0.6
     },
     {
       "season": "2026/27",
@@ -687,7 +795,7 @@
       "year": 2025,
       "ageGroup": "35-59",
       "sariType": "Gesamt",
-      "incidence": 3.3
+      "incidence": 3.2
     },
     {
       "season": "2025/26",
@@ -696,7 +804,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 12
+      "incidence": 11.9
     },
     {
       "season": "2025/26",
@@ -804,7 +912,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 13.2
+      "incidence": 13.1
     },
     {
       "season": "2025/26",
@@ -822,7 +930,7 @@
       "year": 2025,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 10.2
+      "incidence": 10.1
     },
     {
       "season": "2025/26",
@@ -912,7 +1020,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 11.5
+      "incidence": 11.6
     },
     {
       "season": "2025/26",
@@ -921,7 +1029,7 @@
       "year": 2025,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 30.5
+      "incidence": 30.2
     },
     {
       "season": "2025/26",
@@ -1020,7 +1128,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 10.8
+      "incidence": 11
     },
     {
       "season": "2025/26",
@@ -1029,7 +1137,7 @@
       "year": 2025,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 29.6
+      "incidence": 29.4
     },
     {
       "season": "2025/26",
@@ -1128,7 +1236,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 9.6
+      "incidence": 9.7
     },
     {
       "season": "2025/26",
@@ -1137,7 +1245,7 @@
       "year": 2025,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 29.6
+      "incidence": 29.9
     },
     {
       "season": "2025/26",
@@ -1236,7 +1344,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 10.1
+      "incidence": 9.9
     },
     {
       "season": "2025/26",
@@ -1245,7 +1353,7 @@
       "year": 2025,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 28.2
+      "incidence": 27.7
     },
     {
       "season": "2025/26",
@@ -1254,7 +1362,7 @@
       "year": 2025,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 6.8
+      "incidence": 6.7
     },
     {
       "season": "2025/26",
@@ -1569,7 +1677,7 @@
       "year": 2025,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 33.6
+      "incidence": 34.1
     },
     {
       "season": "2025/26",
@@ -1884,7 +1992,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 11.4
+      "incidence": 11.3
     },
     {
       "season": "2025/26",
@@ -1992,7 +2100,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 15.2
+      "incidence": 15.3
     },
     {
       "season": "2025/26",
@@ -3180,7 +3288,7 @@
       "year": 2025,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 17.3
+      "incidence": 17.2
     },
     {
       "season": "2025/26",
@@ -10632,7 +10740,7 @@
       "year": 2024,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 24.3
+      "incidence": 24.2
     },
     {
       "season": "2024/25",
@@ -11181,7 +11289,7 @@
       "year": 2024,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 62.1
+      "incidence": 62.4
     },
     {
       "season": "2024/25",
@@ -11289,7 +11397,7 @@
       "year": 2024,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 67.1
+      "incidence": 67.7
     },
     {
       "season": "2024/25",
@@ -11298,7 +11406,7 @@
       "year": 2024,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 16.4
+      "incidence": 16.5
     },
     {
       "season": "2024/25",
@@ -11595,7 +11703,7 @@
       "year": 2024,
       "ageGroup": "35-59",
       "sariType": "Gesamt",
-      "incidence": 5.1
+      "incidence": 5.2
     },
     {
       "season": "2024/25",
@@ -11721,7 +11829,7 @@
       "year": 2024,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 73
+      "incidence": 73.3
     },
     {
       "season": "2024/25",
@@ -14088,7 +14196,7 @@
       "year": 2023,
       "ageGroup": "60-79",
       "sariType": "Gesamt",
-      "incidence": 14
+      "incidence": 13.9
     },
     {
       "season": "2023/24",
@@ -14106,7 +14214,7 @@
       "year": 2023,
       "ageGroup": "00+",
       "sariType": "Gesamt",
-      "incidence": 13
+      "incidence": 12.9
     },
     {
       "season": "2023/24",
@@ -15177,7 +15285,7 @@
       "year": 2023,
       "ageGroup": "80+",
       "sariType": "Gesamt",
-      "incidence": 57.9
+      "incidence": 58.2
     },
     {
       "season": "2023/24",
